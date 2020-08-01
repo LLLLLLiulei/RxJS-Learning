@@ -1,0 +1,93 @@
+创建
+
+create(subscribe: function) 
+使用给定的订阅函数来创建 observable
+
+empty(scheduler: Scheduler): Observable
+立即完成的 observable
+
+from(ish: ObservableInput, mapFn: function, thisArg: any, scheduler: Scheduler): Observable
+将数组、promise 或迭代器转换成 observable
+
+fromEvent(target: EventTargetLike, eventName: string, selector: function): Observable
+将事件转换成 observable 序列
+
+interval(period: number, scheduler: Scheduler): Observable
+基于给定时间间隔发出数字序列
+
+of(...values, scheduler: Scheduler): Observable
+按顺序发出任意数量的值
+
+range(start: number, count: number, scheduler: Scheduler): Observable
+依次发出给定区间内的数字
+
+throw(error: any, scheduler: Scheduler): Observable
+在订阅上发出错误
+
+timer(initialDelay: number | Date, period: number, scheduler: Scheduler): Observable
+给定持续时间后，再按照指定间隔时间依次发出数字
+
+------------------------------------------------------------------------------------------------------------------------------
+
+转换
+
+buffer(closingNotifier: Observable): Observable
+收集输出值，直到提供的 observable 发出才将收集到的值作为数组发出
+
+bufferCount(bufferSize: number, startBufferEvery: number = null): Observable
+收集发出的值，直到收集完提供的数量的值才将其作为数组发出
+
+bufferTime(bufferTimeSpan: number, bufferCreationInterval: number, scheduler: Scheduler): Observable
+收集发出的值，直到经过了提供的时间才将其作为数组发出
+
+bufferToggle(openings: Observable, closingSelector: Function): Observable
+开启开关以捕获源 observable 所发出的值，关闭开关以将缓冲的值作为数组发出
+
+bufferWhen(closingSelector: function): Observable
+收集值，直到关闭选择器发出值才发出缓冲的值
+
+concatMap(project: function, resultSelector: function): Observable
+将值映射成内部 observable，并按顺序订阅和发出
+concatMap 和 mergeMap 之间的区别: concatMap 之前前一个内部 observable 完成后才会订阅下一个，mergeMap 会立即订阅所有内部 observables
+
+concatMapTo(observable: Observable, resultSelector: function): Observable
+当前一个 observable 完成时订阅提供的 observable 并发出值
+
+exhaustMap(project: function, resultSelector: function): Observable
+映射成内部 observable，忽略其他值直到该 observable 完成
+
+groupBy(keySelector: Function, elementSelector: Function): Observable
+基于提供的值分组成多个 observables
+
+map(project: Function, thisArg: any): Observable
+对源 observable 的每个值应用投射函数
+
+mapTo(value: any): Observable
+将每个发出值映射成常量
+
+mergeMap(project: function: Observable, resultSelector: function: any, concurrent: number): Observable
+映射成 observable 并发出值
+flatMap 是 mergeMap 的别名
+如果同一时间应该只有一个内部 subscription 是有效的，请尝试 switchMap
+如果内部 observables 发送和订阅的顺序很重要，请尝试 concatMap
+
+partition(predicate: function: boolean, thisArg: any): [Observable, Observable]
+Split one observable into two based on provided predicate，基于提供的函数把一个observable分成两个
+
+pluck(properties: ...args): Observable
+选择属性来发出
+
+reduce(accumulator: function, seed: any): Observable
+将源 observalbe 的值归并为单个值，当源 observable 完成时将这个值发出
+
+scan(accumulator: function, seed: any): Observable
+随着时间的推移进行归并
+此操作符是许多基于 Redux 实现的 RxJS 的核心
+
+switchMap(project: function: Observable, resultSelector: function(outerValue, innerValue, outerIndex, innerIndex): any): Observable
+映射成 observable，完成前一个内部 observable，发出值
+如果你想要维护多个内部 subscription 的话， 请尝试 mergeMap
+此操作符通常被认为是 mergeMap 的安全版本
+此操作符可以取消正在进行中的网络请求
+switchMap 和其他打平操作符的主要区别是它具有取消效果。在每次发出时，会取消前一个内部 observable (你所提供函数的结果) 的订阅，然后订阅一个新的 observable 。你可以通过短语切换成一个新的 observable来记忆它
+不过要小心，在每个请求都需要完成的情况下，考虑写数据库，你可能要避免使用 switchMap 。如果源 observable 发出速度足够快的话，switchMap 可以取消请求。在这些场景中，mergeMap 是正确的选择

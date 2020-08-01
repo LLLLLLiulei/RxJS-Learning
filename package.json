@@ -1,0 +1,29 @@
+{
+  "name": "rxjsDemo",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "webpack-dev-server --mode development"
+  },
+  "dependencies": {
+    "@babel/polyfill": "^7.10.4",
+    "rxjs": "^6.5.5",
+    "spark-md5": "^3.0.1",
+    "ts-md5": "^1.2.7"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.10.4",
+    "@babel/core": "^7.10.4",
+    "@babel/node": "^7.10.4",
+    "@babel/preset-env": "^7.10.4",
+    "@types/spark-md5": "^3.0.2",
+    "babel-loader": "^8.1.0",
+    "ts-loader": "^7.0.5",
+    "tslint": "^6.1.2",
+    "typescript": "^3.9.5",
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.0"
+  }
+}
