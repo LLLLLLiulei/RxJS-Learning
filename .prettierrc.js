@@ -1,6 +1,7 @@
 module.exports = {
-  "eslintIntegration": true,
-  "singleQuote": true,
-  "semi": false,
-  "eslint.autoFixOnSave": true
+  printWidth: 150,
+  eslintIntegration: true,
+  singleQuote: true,
+  semi: false,
+  'eslint.autoFixOnSave': true,
 }

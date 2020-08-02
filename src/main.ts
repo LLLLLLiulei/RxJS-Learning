@@ -1,67 +1,28 @@
-import {
-  Observable,
-  fromEvent,
-  Subscriber,
-  from,
-  forkJoin,
-  Subject,
-  of,
-  throwError,
-} from 'rxjs'
-import {
-  tap,
-  pluck,
-  map,
-  filter,
-  switchMap,
-  mergeAll,
-  delayWhen,
-  takeUntil,
-  repeatWhen,
-  distinctUntilChanged,
-  catchError,
-  retryWhen,
-} from 'rxjs/operators'
+import { Observable, fromEvent, Subscriber, from, forkJoin, Subject, of, throwError } from 'rxjs'
+import { tap, pluck, map, filter, switchMap, mergeAll, delayWhen, takeUntil, repeatWhen, distinctUntilChanged, catchError, retryWhen } from 'rxjs/operators'
 import { ajax } from 'rxjs/ajax'
 import * as SparkMD5 from 'spark-md5'
-import {
-  Chunk,
-  UploadFile,
-  UploadEvent,
-  UploadParams,
-  EventType,
-} from './types'
+import { Chunk, UploadFile, UploadEvent, UploadParams, EventType } from './types'
 
 class FileUploader {
-  concurrency: number = 1
-  chunkSize: number = 1024 * 1024
-  $chooseFileBtn: HTMLButtonElement = document.querySelector('#chooseFileBtn')
-  $startBtn: HTMLButtonElement = document.querySelector('#startBtn')
-  $pauseBtnBtn: HTMLButtonElement = document.querySelector('#pauseBtn')
-  $resumeBtn: HTMLButtonElement = document.querySelector('#resumeBtn')
-  $fileName: HTMLDivElement = document.querySelector('#fileName')
-  $process: HTMLDivElement = document.querySelector('#process')
-  $fileInput: HTMLInputElement = document.querySelector('#fileInput')
+  private concurrency: number = 1
+  private chunkSize: number = 1024 * 1024
+  private $chooseFileBtn: HTMLButtonElement = document.querySelector('#chooseFileBtn')
+  private $startBtn: HTMLButtonElement = document.querySelector('#startBtn')
+  private $pauseBtnBtn: HTMLButtonElement = document.querySelector('#pauseBtn')
+  private $resumeBtn: HTMLButtonElement = document.querySelector('#resumeBtn')
+  private $fileName: HTMLDivElement = document.querySelector('#fileName')
+  private $process: HTMLDivElement = document.querySelector('#process')
+  private $fileInput: HTMLInputElement = document.querySelector('#fileInput')
 
   subject: Subject<UploadEvent> = new Subject()
-
-  pause$ = fromEvent(this.$pauseBtnBtn, 'click').pipe(
-    tap(() => this.showBtn(this.$resumeBtn))
-  )
-
-  resume$ = fromEvent(this.$resumeBtn, 'click').pipe(
-    tap(() => this.showBtn(this.$pauseBtnBtn))
-  )
-
-  start$ = fromEvent(this.$startBtn, 'click').pipe(
-    tap(() => this.showBtn(this.$pauseBtnBtn))
-  )
+  pause$ = fromEvent(this.$pauseBtnBtn, 'click').pipe(tap(() => this.showBtn(this.$resumeBtn)))
+  resume$ = fromEvent(this.$resumeBtn, 'click').pipe(tap(() => this.showBtn(this.$pauseBtnBtn)))
+  start$ = fromEvent(this.$startBtn, 'click').pipe(tap(() => this.showBtn(this.$pauseBtnBtn)))
 
   progress$ = this.subject.pipe(
     filter((e: UploadEvent) => e.type === EventType.Progress),
-    distinctUntilChanged(
-      (val: UploadEvent, oldVal: UploadEvent) => val.data - oldVal.data > 0
-    ),
+    distinctUntilChanged((val: UploadEvent, oldVal: UploadEvent) => val.data - oldVal.data > 0),
     tap((e: UploadEvent) => {
       let percent = e.data + '%'
       this.$process.parentElement.style.display = 'block'
@@ -83,19 +44,13 @@ class FileUploader {
       this.$fileName.style.display = 'block'
       this.showBtn()
     }),
-    switchMap((file: File) =>
-      this.getFileMd5(file).pipe(map((md5) => ({ md5, file })))
-    ),
+    switchMap((file: File) => this.getFileMd5(file).pipe(map((md5) => ({ md5, file })))),
     tap((uploadFile: UploadFile) => {
       this.$fileName.innerHTML = `文件名：${uploadFile.file.name}</br>md5值：${uploadFile.md5}`
       this.showBtn(this.$startBtn)
     }),
     delayWhen(() => this.start$),
-    switchMap((uploadFile: UploadFile) =>
-      this.getFileChunks(this.chunkSize, uploadFile.file).pipe(
-        map((chunks: Chunk[]) => Object.assign({}, uploadFile, { chunks }))
-      )
-    ),
+    switchMap((uploadFile: UploadFile) => this.getFileChunks(this.chunkSize, uploadFile.file).pipe(map((chunks: Chunk[]) => Object.assign({}, uploadFile, { chunks })))),
     tap(console.log),
     switchMap(this.uploadChunks.bind(this)),
     tap(() => this.showBtn())
@@ -144,28 +99,20 @@ class FileUploader {
       let percent = Math.round((totalLoaded / file.size) * 100)
       this.subject.next({ type: EventType.Progress, data: percent })
     }
-    let chunkTasks$: Observable<ProgressEvent>[] = chunks.map(
-      (chunk: Chunk, index: number) => {
-        let uploadParams: UploadParams = {
-          chunkNumber: index + 1,
-          identifier: md5,
-          filename: file.name,
-          relativePath: file.name,
-          totalChunks: chunks.length,
-        }
-        return this.postChunk(uploadParams, file, chunk).pipe(
-          tap((e: ProgressEvent) => progressHandler(e, index))
-        )
+    let chunkTasks$: Observable<ProgressEvent>[] = chunks.map((chunk: Chunk, index: number) => {
+      let uploadParams: UploadParams = {
+        chunkNumber: index + 1,
+        identifier: md5,
+        filename: file.name,
+        relativePath: file.name,
+        totalChunks: chunks.length,
       }
-    )
+      return this.postChunk(uploadParams, file, chunk).pipe(tap((e: ProgressEvent) => progressHandler(e, index)))
+    })
     return forkJoin(from(chunkTasks$).pipe(mergeAll(this.concurrency)))
   }
 
-  postChunk(
-    params: UploadParams,
-    file: File,
-    chunk: Chunk
-  ): Observable<ProgressEvent> {
+  postChunk(params: UploadParams, file: File, chunk: Chunk): Observable<ProgressEvent> {
     return Observable.create((ob: Subscriber<ProgressEvent>) => {
       let ajax$ = ajax({
         url: 'http://ecm.test.work.zving.com/catalogs/1346/files/upload',
@@ -199,22 +146,16 @@ class FileUploader {
   }
 
   showBtn(displayBtn?: HTMLButtonElement) {
-    let btns = [
-      this.$chooseFileBtn,
-      this.$startBtn,
-      this.$pauseBtnBtn,
-      this.$resumeBtn,
-    ]
+    let btns = [this.$chooseFileBtn, this.$startBtn, this.$pauseBtnBtn, this.$resumeBtn]
     btns.forEach((btn) => {
       btn.style.display = btn === displayBtn ? 'block' : 'none'
     })
   }
 
   constructor() {
-    this.$chooseFileBtn.addEventListener('click', () => {
-      this.$fileInput.click()
-    })
+    this.$chooseFileBtn.addEventListener('click', () => this.$fileInput.click())
     of(this.upload$, this.progress$).pipe(mergeAll()).subscribe()
   }
 }
+
 new FileUploader()
