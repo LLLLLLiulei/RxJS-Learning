@@ -5,54 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title></title>
-    <link
-      href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/4.5.0/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/4.5.0/css/bootstrap.min.css" rel="stylesheet" />
   </head>
   <body>
-    <input
-      type="file"
-      id="fileInput"
-      style="width: 0px; height: 0px; visibility: hidden;"
-    />
+    <input type="file" id="fileInput" style="width: 0px; height: 0px; visibility: hidden;" />
 
     <div style="width: 50%; margin: 0 auto;">
       <div id="fileName" style="text-align: center;"></div>
       <div style="display: none;">
         <div class="progress" id="process">
-          <div
-            class="progress-bar progress-bar-success progress-bar-striped"
-            role="progressbar"
-          ></div>
+          <div class="progress-bar progress-bar-success progress-bar-striped" role="progressbar"></div>
         </div>
       </div>
-      <div
-        class="btn-div"
-        style="margin: 10px; display: flex; justify-content: center;"
-      >
+      <div class="btn-div" style="margin: 10px; display: flex; justify-content: center;">
         <button id="chooseFileBtn" type="button" class="btn btn-success">
           选择文件
         </button>
-        <button
-          id="startBtn"
-          class="btn btn-success"
-          style="margin: 10px; display: none;"
-        >
+        <button id="startBtn" class="btn btn-success" style="display: none;">
           开始上传
         </button>
-        <button
-          id="pauseBtn"
-          class="btn btn-success"
-          style="margin: 10px; display: none;"
-        >
+        <button id="pauseBtn" class="btn btn-success" style="display: none;">
           暂停上传
         </button>
-        <button
-          id="resumeBtn"
-          class="btn btn-success"
-          style="margin: 10px; display: none;"
-        >
+        <button id="resumeBtn" class="btn btn-success" style="display: none;">
           继续上传
         </button>
       </div>
